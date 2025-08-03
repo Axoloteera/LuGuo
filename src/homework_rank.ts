@@ -1,12 +1,15 @@
-import {waitForElement} from "./utils";
+import {print, waitForElementRemoval} from "./utils";
 
 console.log("homework_rank");
 
 export function homework_rank_sticky() {
-    waitForElement('.header-wrap .header')
-        .then(header => {
+    Promise.all([
+        waitForElementRemoval('.card.padding-default .spinner')
+        //@ts-ignore
+    ]).then(() => {
+        setTimeout(()=>{
+            const header = document.querySelector('.header-wrap .header');
             if (!header) return;
-            if (document.body.dataset.__luguo_homework_rank_sticky === 'done') return;
             const scrollEl = document.querySelector('.card.padding-default > div[style*="overflow"]');
             if (!scrollEl) return;
 
@@ -30,9 +33,8 @@ export function homework_rank_sticky() {
                 });
                 offset += widths[idx-1];
             }
-
-
-            document.body.dataset.__luguo_homework_rank_sticky = 'done';
-        })
-        .catch(_=>{console.error('homework_rank init error')});
+            print("作业排行榜已固定");
+        }, 250)
+    })
+    .catch(_=>{console.error('homework_rank init error')});
 }
