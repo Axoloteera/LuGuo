@@ -3,6 +3,8 @@ import {homework_rank_sticky} from "./homework_rank";
 import {user_profile_display} from "./user_profile_display";
 import {unsafeWindow} from "$";
 import {print} from "./utils";
+import {hookXhr} from "./xhrHook";
+import {registerTestcaseGetter} from "./testcase_getter";
 
 print("LuGuo 尝试加载中...")
 
@@ -24,3 +26,6 @@ if (vueApp && vueApp.__vue__ && vueApp.__vue__.$router) {
 }
 
 onRouteChange();
+
+hookXhr();
+registerTestcaseGetter();
