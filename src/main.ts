@@ -5,6 +5,7 @@ import {unsafeWindow} from "$";
 import {print} from "./utils";
 import {hookXhr} from "./xhrHook";
 import {registerTestcaseGetter} from "./testcase_getter";
+import {onDoubleShift} from "./cmd_panel";
 
 print("LuGuo 尝试加载中...")
 
@@ -24,6 +25,23 @@ if (vueApp && vueApp.__vue__ && vueApp.__vue__.$router) {
 } else {
     print('未找到Vue App, 加载失败', 'error')
 }
+
+const shiftDelay = 300;
+let lastShiftTime = 0;
+
+unsafeWindow.addEventListener('keydown', (e) => {
+    if (e.key !== 'Shift' || e.repeat) return;
+    console.log("bb")
+
+    const now = Date.now();
+    if (now - lastShiftTime <= shiftDelay) {
+        onDoubleShift();
+        lastShiftTime = 0;
+    } else {
+        lastShiftTime = now;
+    }
+}, true);
+
 
 onRouteChange();
 

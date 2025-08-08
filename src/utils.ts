@@ -54,6 +54,12 @@ export function print(message: string = "", type: 'log' | 'error' = 'log') {
     }
 }
 
+export function getUserName(): string {
+    return (unsafeWindow as any)._feInjection.currentUser.name ||
+        unsafeWindow.document.querySelector('.name')?.textContent.trim() ||
+        '';
+}
+
 export function createPopup(content: string, type: 'textarea' | 'html' = 'html') {
     const container = unsafeWindow.document.createElement('div');
     Object.assign(container.style, {
