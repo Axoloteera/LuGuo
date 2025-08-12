@@ -1,4 +1,4 @@
-import {unsafeWindow} from "$";
+import {GM_getValue, unsafeWindow} from "$";
 
 export function waitForElement(selector: any, timeout: number | null = null): Promise<HTMLElement> {
     return new Promise((resolve, reject) => {
@@ -55,9 +55,17 @@ export function print(message: string = "", type: 'log' | 'error' = 'log') {
 }
 
 export function getUserName(): string {
-    return (unsafeWindow as any)._feInjection.currentUser.name ||
-        unsafeWindow.document.querySelector('.name')?.textContent.trim() ||
-        '';
+    const w = unsafeWindow as any;
+    return (
+        w._feInjection?.currentUser?.name?.trim?.() ||
+        w.document.querySelector('.name')?.textContent?.trim() ||
+        ''
+    );
+}
+
+export function getSetting(key: string): boolean {
+    const settings = GM_getValue("luguo-settings");
+    return settings[key] !== undefined ? settings[key] : true;
 }
 
 export function createPopup(content: string, type: 'textarea' | 'html' = 'html') {

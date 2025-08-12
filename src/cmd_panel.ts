@@ -10,7 +10,7 @@ function getResults(cmd: string): Record<string, Function>[] {
     if ( !cmd ) {
         if ( path.startsWith('/problem/') ) {
             const problem_id = path.split('/').pop();
-            if (problem_id) {
+            if ( problem_id ) {
                 results.push({
                     [`查看题目 ${problem_id} 的个人提交记录`]: () => {
                         unsafeWindow.location.href = `/record/list?pid=${problem_id}&user=${userName}&page=1`;
@@ -31,13 +31,23 @@ function getResults(cmd: string): Record<string, Function>[] {
                     unsafeWindow.location.href = `/record/list?pid=${problem_id}&user=${userName}&page=1`;
                 }
             });
+            results.push({
+                [`查看题目 ${problem_id}`]: () => {
+                    unsafeWindow.location.href = `/problem/${problem_id}`;
+                }
+            });
         }
 
-        if ( path.startsWith('/record/list') && params.get('user')  && params.get('pid') ) {
+        if ( path.startsWith('/record/list') && params.get('user') && params.get('pid') ) {
             const problem_id = params.get('pid');
             results.push({
                 [`查看题目 ${problem_id} 的所有提交记录`]: () => {
                     unsafeWindow.location.href = `/record/list?pid=${problem_id}&page=1`;
+                }
+            });
+            results.push({
+                [`查看题目 ${problem_id}`]: () => {
+                    unsafeWindow.location.href = `/problem/${problem_id}`;
                 }
             });
         }
@@ -48,6 +58,7 @@ function getResults(cmd: string): Record<string, Function>[] {
             }
         });
     }
+
 
     if (/^\d+$/.test(cmd)) {
         const id = parseInt(cmd, 10);
@@ -63,6 +74,7 @@ function getResults(cmd: string): Record<string, Function>[] {
             }
         })
     }
+
     if (/^[a-zA-Z]\d+$/.test(cmd)) {
         //第一个字母大写
         const problem_id = cmd.charAt(0).toUpperCase() + cmd.slice(1);
@@ -89,10 +101,10 @@ function showResults(command:string, resultList: HTMLElement, panel: HTMLElement
         const li = unsafeWindow.document.createElement('li');
         li.textContent = Object.keys(result)[0];
         li.style.cssText = `
-                        padding: 5px;
-                        cursor: pointer;
-                        transition: all 0.2s ease;
-                    `;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        `;
         li.addEventListener('click', () => {
             result[Object.keys(result)[0]]();
             panel.remove();
@@ -108,11 +120,11 @@ function openCommandPanel() {
 
     const style = unsafeWindow.document.createElement('style');
     style.textContent = `
-    #luguo-command-panel ul li:hover {
-        background-color: #f5f5f5;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-`;
+        #luguo-command-panel ul li:hover {
+            background-color: #f5f5f5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    `;
     unsafeWindow.document.head.appendChild(style);
 
     const panel = unsafeWindow.document.createElement('div');
@@ -145,9 +157,7 @@ function openCommandPanel() {
     `;
     input.addEventListener('keyup', () => {
         const command = input.value.trim();
-        if (command) {
-            showResults(command, resultList, panel);
-        }
+        showResults(command, resultList, panel);
     });
     panel.appendChild(input);
 
