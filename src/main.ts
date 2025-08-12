@@ -2,7 +2,7 @@
 import {homework_rank_sticky} from "./homework_rank";
 import {user_profile_display} from "./user_profile_display";
 import {unsafeWindow} from "$";
-import {getSetting, print} from "./utils";
+import {getSetting, print, waitForElement} from "./utils";
 import {hookXhr} from "./xhrHook";
 import {registerTestcaseGetter} from "./testcase_getter";
 import {onDoubleShift} from "./cmd_panel";
@@ -18,24 +18,30 @@ function onRouteChange() {
 
 }
 
-const vueApp = unsafeWindow.document.querySelector('#app') as any;
-console.log('vueApp', vueApp);
-setTimeout(() => {
-    if (vueApp && vueApp.__vue__ && vueApp.__vue__.$router) {
-        vueApp.__vue__.$router.afterHooks.push(()=>{
-            print("检测到路由变化。")
-            // 等待页面加载
-            setTimeout(onRouteChange, 250);
-        })
-    } else if ( vueApp?.__vue_app__?.config?.globalProperties?.$router ) {
-        vueApp.__vue_app__.config.globalProperties.$router.afterEach(()=>{
-            print("检测到路由变化。")
-            setTimeout(onRouteChange, 250);
-        })
-    } else {
+waitForElement("#app", 10000)
+    .then(() => {
+        const vueApp = unsafeWindow.document.querySelector('#app') as any;
+        //console.log('vueApp', vueApp);
+        setTimeout(() => {
+            if (vueApp && vueApp.__vue__ && vueApp.__vue__.$router) {
+                vueApp.__vue__.$router.afterHooks.push(()=>{
+                    print("检测到路由变化。")
+                    // 等待页面加载
+                    setTimeout(onRouteChange, 250);
+                })
+            } else if ( vueApp?.__vue_app__?.config?.globalProperties?.$router ) {
+                vueApp.__vue_app__.config.globalProperties.$router.afterEach(()=>{
+                    print("检测到路由变化。")
+                    setTimeout(onRouteChange, 250);
+                })
+            } else {
+                print('未找到Vue App, 加载失败', 'error')
+            }
+        }, 250);
+    })
+    .catch(() => {
         print('未找到Vue App, 加载失败', 'error')
-    }
-}, 250);
+    })
 
 const shiftDelay = 300;
 let lastShiftTime = 0;

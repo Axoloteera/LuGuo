@@ -61,8 +61,7 @@ function getResults(cmd: string): Record<string, Function>[] {
 
 
     if (/^\d+$/.test(cmd)) {
-        const id = parseInt(cmd, 10);
-        const problem_id = `P${id}`;
+        const problem_id = `P${cmd.substring(0,10)}`;
         results.push({
             [`查看题目 ${problem_id}`]: () => {
                 unsafeWindow.location.href = `/problem/${problem_id}`;
@@ -99,6 +98,7 @@ function showResults(command:string, resultList: HTMLElement, panel: HTMLElement
     resultList.innerHTML = '';
     results.forEach(result => {
         const li = unsafeWindow.document.createElement('li');
+        li.id = 'luguo-command-result-' + Object.keys(result)[0];
         li.textContent = Object.keys(result)[0];
         li.style.cssText = `
             padding: 5px;
@@ -124,6 +124,14 @@ function openCommandPanel() {
             background-color: #f5f5f5;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+        #luguo-command-panel ul li.active:hover {
+            background-color: #1974ba;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #luguo-command-panel ul li.active {
+            background-color: #1974ba;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
     `;
     unsafeWindow.document.head.appendChild(style);
 
@@ -141,6 +149,12 @@ function openCommandPanel() {
         justify-content: center;
         align-items: center;
     `;
+    panel.addEventListener('click', (e) => {
+        if (e.target === panel) {
+            panel.remove();
+            unsafeWindow.document.body.dataset.cmdPanel = '';
+        }
+    })
     unsafeWindow.document.body.append(panel);
 
     const input = unsafeWindow.document.createElement('input');
@@ -155,18 +169,11 @@ function openCommandPanel() {
         position: relative;
         top: -10%;
     `;
-    input.addEventListener('keyup', () => {
+    input.addEventListener('input', () => {
+        unsafeWindow.document.body.dataset.currentIndex = '-1'
         const command = input.value.trim();
         showResults(command, resultList, panel);
     });
-    panel.appendChild(input);
-
-    input.focus();
-
-    // input.addEventListener('blur', () => {
-    //     panel.remove();
-    //     unsafeWindow.document.body.dataset.cmdPanel = '';
-    // });
 
     const resultList = unsafeWindow.document.createElement('ul');
     resultList.style.cssText = `
@@ -185,6 +192,57 @@ function openCommandPanel() {
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     `;
 
+    input.addEventListener('keydown', (e) => {
+        if ( !unsafeWindow.document.body.dataset.cmdPanel ) return;
+        if ( !unsafeWindow.document.body.dataset.currentIndex ) {
+            unsafeWindow.document.body.dataset.currentIndex = '-1';
+        }
+
+        e.stopPropagation();
+
+        if ( e.key === 'Enter' ) {
+            let currentIndex = parseInt(unsafeWindow.document.body.dataset.currentIndex, 10);
+            if ( currentIndex === -1 ) {
+                unsafeWindow.document.body.dataset.currentIndex = '0'; // 其实不必要
+                currentIndex = 0;
+            }
+            const items = resultList.querySelectorAll('li');
+            if (items.length > 0 && currentIndex < items.length) {
+                items[currentIndex].click();
+            }
+            panel.remove();
+            unsafeWindow.document.body.dataset.cmdPanel = '';
+        } else if ( e.key === 'ArrowDown' ) {
+            e.preventDefault();
+            const items = resultList.querySelectorAll('li');
+            if (items.length > 0) {
+                let currentIndex = parseInt(unsafeWindow.document.body.dataset.currentIndex, 10);
+                currentIndex = (currentIndex + 1) % items.length;
+                unsafeWindow.document.body.dataset.currentIndex = currentIndex.toString();
+                items.forEach((item, index) => {
+                    item.className = index === currentIndex ? 'active' : '';
+                })
+            }
+        } else if ( e.key === 'ArrowUp' ) {
+            e.preventDefault();
+            const items = resultList.querySelectorAll('li');
+            if (items.length > 0) {
+                let currentIndex = parseInt(unsafeWindow.document.body.dataset.currentIndex, 10);
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                unsafeWindow.document.body.dataset.currentIndex = currentIndex.toString();
+                items.forEach((item, index) => {
+                    item.className = index === currentIndex ? 'active' : '';
+                })
+            }
+        } else if ( e.key === 'Escape' ) {
+            e.preventDefault();
+            panel.remove();
+            unsafeWindow.document.body.dataset.cmdPanel = '';
+        }
+    });
+    panel.appendChild(input);
+
+    input.focus();
 
     panel.appendChild(resultList);
 

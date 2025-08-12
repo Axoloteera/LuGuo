@@ -19,6 +19,7 @@ export default defineConfig({
             'https://*.luogu.com.cn/*',
             'https://*.luogu.com/*'
         ],
+        "run-at": "document-idle", // 等待洛谷加载完毕
       },
     }),
   ],
